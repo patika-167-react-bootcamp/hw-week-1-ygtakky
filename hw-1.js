@@ -28,17 +28,8 @@ const move = (fileId, folderId) => {
     console.log("Please enter a valid input");
     return -1;
   }
-  // Initialize target file for scope
-  let targetFile = undefined;
   // Find the file with its file id
-  const sourceFolder = folders.find((folder) => {
-    if (folder.files) {
-      targetFile = folder.files.find((file) => {
-        return file.id === fileId;
-      });
-      return targetFile;
-    }
-  });
+  const sourceFolder = findFile(fileId)
   
   // If file is not found return -1 else continue copying file to target folder
   if (sourceFolder === undefined)
@@ -46,10 +37,10 @@ const move = (fileId, folderId) => {
     console.log("No file with that file id!")
     return -1
   } else {
+    // Get target file from the source folder
+    const targetFile = getFile(fileId)
     // check if there is a target folder and get its index
-    const targetIndex = folders.findIndex((folder) => {
-      return folder.id === folderId;
-    });
+    const targetIndex = indexOfFolder(folderId)
     // Check if the target folder exists
     if (targetIndex === -1) {
       console.log("No target folder with that folder id!")
@@ -61,7 +52,7 @@ const move = (fileId, folderId) => {
       return targetFile
     } else {
       folders[targetIndex].files ? folders[targetIndex].files.push(targetFile) : folders[targetIndex] = {...folders[targetIndex], files: [targetFile]} // Check if the folder has files array, if not create it and add the file
-      // Delete the file from the source folder depending on its index
+      // Delete the file from the source folder depending on file index
       const fileIndex = sourceFolder.files.indexOf(targetFile)
       sourceFolder.files.splice(fileIndex, 1)
     }
@@ -76,17 +67,8 @@ const copy = (fileId, folderId) => {
     console.log("Please enter a valid input");
     return -1;
   }
-  // Initialize target file for scope
-  let targetFile = undefined;
   // Find the file with its file id
-  const sourceFolder = folders.find((folder) => {
-    if (folder.files) {
-      targetFile = folder.files.find((file) => {
-        return file.id === fileId;
-      });
-      return targetFile;
-    }
-  });
+  const sourceFolder = findFile(fileId)
   
   // If file is not found return -1 else continue copying file to target folder
   if (sourceFolder === undefined)
@@ -94,21 +76,23 @@ const copy = (fileId, folderId) => {
     console.log("No file with that file id!")
     return -1
   } else {
+    // Get target file from the source folder
+    const targetFile = getFile(fileId)
     // check if there is a folder and get its index
-    const index = folders.findIndex((folder) => {
+    const targetIndex = folders.findIndex((folder) => {
       return folder.id === folderId;
     });
     // Check if the target folder exists
-    if (index === undefined) {
+    if (targetIndex === -1) {
       console.log("No target folder with that folder id!")
       return -1
     } 
     // If target and source folder is same do nothing else put target file to the target folder
-    if (sourceFolder.id === folders[index].id )
+    if (sourceFolder.id === folders[targetIndex].id )
     {
       return targetFile
     } else {
-      folders[index].files ? folders[index].files.push(targetFile) : folders[index] = {...folders[index], files: [targetFile]} // Check if the folder has files array, if not create it and add the file
+      folders[targetIndex].files ? folders[targetIndex].files.push(targetFile) : folders[targetIndex] = {...folders[targetIndex], files: [targetFile]} // Check if the folder has files array, if not create it and add the file
     }
   }
   return targetFile
@@ -121,25 +105,26 @@ const remove = (fileId) => {
     console.log("Please enter a valid file Id!");
     return -1;
   }
-  // Initialize variable for proper scope
-  let deletedFile;
+  // Initialize target file for scope
+  let targetFile;
   // Find the file with its file id
-  const targetFolder = folders.find((folder) => {
-    if (folder.files) {
-      const targetFile = folder.files.find((file) => {
-        return file.id === fileId;
-      });
-      // If file is found delete it
-      if (targetFile) {
-        const fileIndex = folder.files.indexOf(targetFile); // Find index of the file
-        deletedFile = folder.files.splice(fileIndex, 1); // Delete the file depending on its index
-      }
-      return targetFile;
+  const targetFolder = findFile(fileId)
+
+  if (targetFolder === undefined) // If file is not found return -1 and display a error message
+  {
+    console.log("No file with that file id!")
+    return -1
+  } else {
+    targetFile = getFile(fileId)
+    // If file is found delete it
+    if (targetFile) {
+      const fileIndex = targetFolder.files.indexOf(targetFile); // Find index of the file
+      folders[indexOfFolder(targetFolder.id)].files.splice(fileIndex, 1); // Delete the file depending on its index
     }
-  });
+  }
 
   // If file is found return deleted file, else return -1
-  return targetFolder ? deletedFile : -1;
+  return targetFolder ? targetFile : -1;
 };
 
 // Remove a object from a array depending on its id
@@ -150,11 +135,9 @@ const removeFolder = (folderId) => {
     return -1;
   }
   // check if there is a folder and get its index
-  const index = folders.findIndex((folder) => {
-    return folder.id === folderId;
-  });
+  const folderIndex = indexOfFolder(folderId)
   // If there is folder with that id delete it, else return -1
-  return index >= 0 ? folders.splice(index, 1) : -1;
+  return folderIndex >= 0 ? folders.splice(folderIndex, 1) : -1;
 };
 
 // Find the id of the parent folder of a file in a array or return -1 if there is no such file
@@ -165,13 +148,38 @@ const parentFolderOf = (fileId) => {
     return -1;
   }
   // Find the folder that has the file
-  const parentFolder = folders.find((folder) => {
-    if (folder.files) {
-      return folder.files.find((file) => {
-        return file.id === fileId;
-      });
-    }
-  });
+  const parentFolder = findFile(fileId)
   // Return id if it is found, -1 if it is not
   return parentFolder ? parentFolder.id : -1;
 };
+
+// Helper function - file finder with its id
+const findFile = (fileId) => {
+  const sourceFolder = folders.find((folder) => {
+    if (folder.files) {
+      targetFile = folder.files.find((file) => {
+        return file.id === fileId;
+      });
+      return targetFile;
+    }
+  });
+  return sourceFolder
+}
+
+// Helper function - File getter with its id
+const getFile = (fileId) => {
+  const sourceFolder = findFile(fileId)
+  const targetFile = sourceFolder.files.find((file) => {
+      return file.id === fileId
+    })
+  return targetFile
+}
+
+// Helper function - Folder index finder depending on its id
+const indexOfFolder = (folderId) => {
+  // check if there is a folder and get its index
+  const index = folders.findIndex((folder) => {
+    return folder.id === folderId;
+  });
+  return index
+}
