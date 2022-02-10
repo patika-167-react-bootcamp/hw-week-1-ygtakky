@@ -22,180 +22,156 @@ const folders = [
 ];
 
 // Move a file to a folder using file Id and folder Id
-Array.prototype.move = function (fileId, folderId) {
+const move = (fileId, folderId) => {
+  // Ensure proper file Id and folder Id input
   if (typeof fileId !== "number" && typeof folderId !== "number") {
     console.log("Please enter a valid input");
     return -1;
   }
-  // Filter out the folders that do not have any file
-  const fileFolders = folders.filter(function (element) {
-    return element.files;
+  // Initialize target file for scope
+  let targetFile = undefined;
+  // Find the file with its file id
+  const sourceFolder = folders.find((folder) => {
+    if (folder.files) {
+      targetFile = folder.files.find((file) => {
+        return file.id === fileId;
+      });
+      return targetFile;
+    }
   });
-  // Give moved file a default value of -1 for not finding a file
-  let movedFile = -1;
-  fileFoldersLength = fileFolders.length;
-  // Loop through folder array and file arrays and stop when required file id is found
-  while (fileFoldersLength--) {
-    filesLength = fileFolders[fileFoldersLength].files.length;
-    while (filesLength--) {
-      if (fileFolders[fileFoldersLength].files[filesLength].id === fileId) {
-        movedFile = fileFolders[fileFoldersLength].files.splice(filesLength, 1);
-        break;
-      }
-    }
-    if (movedFile !== -1) {
-      break;
-    }
-  }
-
-  // If file with given file Id do not exist return -1
-  if (movedFile === -1) {
-    console.log("No file with that id!");
-    return -1;
-  }
-  // Get the files in the target folder
-  arrayLength = this.length
-  while (arrayLength--)
+  
+  // If file is not found return -1 else continue copying file to target folder
+  if (sourceFolder === undefined)
   {
-    if (this[arrayLength].id === folderId)
+    console.log("No file with that file id!")
+    return -1
+  } else {
+    // check if there is a target folder and get its index
+    const targetIndex = folders.findIndex((folder) => {
+      return folder.id === folderId;
+    });
+    // Check if the target folder exists
+    if (targetIndex === -1) {
+      console.log("No target folder with that folder id!")
+      return -1
+    } 
+    // If target and source folder is same do nothing, else put target file to the target folder
+    if (sourceFolder.id === folders[targetIndex].id )
     {
-      if (this[arrayLength].files) {
-        this[arrayLength].files.push(movedFile[0]);
-      } else {
-        this[arrayLength].files = [];
-        this[arrayLength].files.push(movedFile[0]);
-      }
+      return targetFile
+    } else {
+      folders[targetIndex].files ? folders[targetIndex].files.push(targetFile) : folders[targetIndex] = {...folders[targetIndex], files: [targetFile]} // Check if the folder has files array, if not create it and add the file
+      // Delete the file from the source folder depending on its index
+      const fileIndex = sourceFolder.files.indexOf(targetFile)
+      sourceFolder.files.splice(fileIndex, 1)
     }
   }
-  return movedFile[0];
+  return targetFile
 };
 
 // Copy a file to a folder using file Id and folder Id
-Array.prototype.copy = function (fileId, folderId) {
+const copy = (fileId, folderId) => {
+  // Ensure proper file Id and folder Id input
   if (typeof fileId !== "number" && typeof folderId !== "number") {
     console.log("Please enter a valid input");
     return -1;
   }
-  // Filter out the folders that do not have any file
-  const fileFolders = folders.filter(function (element) {
-    return element.files;
+  // Initialize target file for scope
+  let targetFile = undefined;
+  // Find the file with its file id
+  const sourceFolder = folders.find((folder) => {
+    if (folder.files) {
+      targetFile = folder.files.find((file) => {
+        return file.id === fileId;
+      });
+      return targetFile;
+    }
   });
-  // Give copied file a default value of -1 for not finding a file
-  let copiedFile = -1;
-  fileFoldersLength = fileFolders.length;
-  // Loop through folder array and file arrays and stop when required file id is found
-  while (fileFoldersLength--) {
-    filesLength = fileFolders[fileFoldersLength].files.length;
-    while (filesLength--) {
-      if (fileFolders[fileFoldersLength].files[filesLength].id === fileId) {
-        copiedFile = fileFolders[fileFoldersLength].files.slice(
-          filesLength,
-          filesLength + 1
-        );
-        break;
-      }
-    }
-    if (copiedFile !== -1) {
-      break;
-    }
-  }
-  // If file with given file Id do not exist return -1
-  if (copiedFile === -1) {
-    console.log("No file with that id!");
-    return -1;
-  }
-  // Get the files in the target folder
-  arrayLength = this.length
-  while (arrayLength--)
+  
+  // If file is not found return -1 else continue copying file to target folder
+  if (sourceFolder === undefined)
   {
-    if (this[arrayLength].id === folderId)
+    console.log("No file with that file id!")
+    return -1
+  } else {
+    // check if there is a folder and get its index
+    const index = folders.findIndex((folder) => {
+      return folder.id === folderId;
+    });
+    // Check if the target folder exists
+    if (index === undefined) {
+      console.log("No target folder with that folder id!")
+      return -1
+    } 
+    // If target and source folder is same do nothing else put target file to the target folder
+    if (sourceFolder.id === folders[index].id )
     {
-      if (this[arrayLength].files) {
-        this[arrayLength].files.push(copiedFile[0]);
-      } else {
-        this[arrayLength].files = [];
-        this[arrayLength].files.push(copiedFile[0]);
-      }
+      return targetFile
+    } else {
+      folders[index].files ? folders[index].files.push(targetFile) : folders[index] = {...folders[index], files: [targetFile]} // Check if the folder has files array, if not create it and add the file
     }
   }
-  return copiedFile[0];
-};
+  return targetFile
+}
 
 // Remove a specific file from any folder by its id
-Array.prototype.remove = function (fileId) {
+const remove = (fileId) => {
   // Ensure proper file Id input
   if (typeof fileId !== "number") {
     console.log("Please enter a valid file Id!");
     return -1;
   }
-  // Filter out the folders that do not have any file
-  const fileFolders = folders.filter(function (element) {
-    return element.files;
-  });
-  // Give deleted file a default value of -1 for not finding a file
-  let deletedFile = -1;
-  fileFoldersLength = fileFolders.length;
-  // Loop through folder array and file arrays and stop when required file id is found
-  while (fileFoldersLength--) {
-    filesLength = fileFolders[fileFoldersLength].files.length;
-    while (filesLength--) {
-      if (fileFolders[fileFoldersLength].files[filesLength].id === fileId) {
-        deletedFile = fileFolders[fileFoldersLength].files.splice(filesLength, 1);
-        break;
+  // Initialize variable for proper scope
+  let deletedFile;
+  // Find the file with its file id
+  const targetFolder = folders.find((folder) => {
+    if (folder.files) {
+      const targetFile = folder.files.find((file) => {
+        return file.id === fileId;
+      });
+      // If file is found delete it
+      if (targetFile) {
+        const fileIndex = folder.files.indexOf(targetFile); // Find index of the file
+        deletedFile = folder.files.splice(fileIndex, 1); // Delete the file depending on its index
       }
+      return targetFile;
     }
-    if (deletedFile !== -1) {
-      break;
-    }
-  }
-  return deletedFile;
+  });
+
+  // If file is found return deleted file, else return -1
+  return targetFolder ? deletedFile : -1;
 };
 
 // Remove a object from a array depending on its id
-Array.prototype.removeFolder = function (folderId) {
-  // Ensure proper file Id input
+const removeFolder = (folderId) => {
+  // Ensure proper folder Id input
   if (typeof folderId !== "number") {
     console.log("Please enter a valid folder Id!");
     return -1;
   }
   // check if there is a folder and get its index
-  const index = this.findIndex(function (element) {
-    return element.id === folderId;
+  const index = folders.findIndex((folder) => {
+    return folder.id === folderId;
   });
-  // If there is no folder with that id in the array return -1
-  if (index === -1) {
-    return -1;
-  } else {
-    return this.splice(index, 1); // return the deleted folders content and delete the folder by its index
-  }
+  // If there is folder with that id delete it, else return -1
+  return index >= 0 ? folders.splice(index, 1) : -1;
 };
 
 // Find the id of the parent folder of a file in a array or return -1 if there is no such file
-Array.prototype.parentFolderOf = function (fileId) {
+const parentFolderOf = (fileId) => {
   // Ensure proper file Id input
   if (typeof fileId !== "number") {
     console.log("Please enter a valid file Id!");
     return -1;
   }
-  // Filter out the folders that do not have any file
-  const fileFolders = folders.filter(function (element) {
-    return element.files;
+  // Find the folder that has the file
+  const parentFolder = folders.find((folder) => {
+    if (folder.files) {
+      return folder.files.find((file) => {
+        return file.id === fileId;
+      });
+    }
   });
-  // Give a default index of -1 for not finding the file
-  let index = -1;
-  fileFoldersLength = fileFolders.length;
-  // Loop through folder array and file arrays and stop when required file id is found
-  while (fileFoldersLength--) {
-    filesLength = fileFolders[fileFoldersLength].files.length;
-    while (filesLength--) {
-      if (fileFolders[fileFoldersLength].files[filesLength].id === fileId) {
-        index = fileFolders[fileFoldersLength].id;
-        break;
-      }
-    }
-    if (index !== -1) {
-      break;
-    }
-  }
-  return index;
+  // Return id if it is found, -1 if it is not
+  return parentFolder ? parentFolder.id : -1;
 };
